@@ -75,13 +75,6 @@
 
     h1 span { color: var(--accent); }
 
-    .authors {
-      margin-top: 18px;
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.7;
-    }
-
     .abstract-block {
       margin-top: 32px;
       background: #eef4fb;
@@ -262,6 +255,15 @@
     .sample-note { font-size: 12px; color: var(--text-muted); font-style: italic; }
     .transcript { font-size: 14px; color: #1e293b; }
 
+    /* 卡片內的頻譜圖：跟下面的試聽同屬一張卡，之間畫一條分隔線 */
+    .sample-spec {
+      padding: 14px 20px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+      background: #fff;
+    }
+    .sample-spec img { max-width: 100%; border-radius: 3px; }
+
     .audio-rows { padding: 4px 0; }
     .audio-row {
       display: grid;
@@ -318,12 +320,6 @@
   <header>
     <div class="tag-line">Audio Demo &middot; Electrolaryngeal Speech Enhancement</div>
     <h1><span>EL-WavLM</span>: Staged Fine-Tuning of Self-Supervised Speech Encoders for Electrolaryngeal Speech Enhancement</h1>
-    <p class="authors">
-      Ming-Chi Yen<sup>1</sup>, Hsin-Te Hwang<sup>2</sup>, Chen-Chou Lo<sup>3</sup>, Yu Tsao<sup>2</sup>, Hsin-Min Wang<sup>1</sup><br>
-      <sup>1</sup>Institute of Information Science, Academia Sinica, Taiwan &middot;
-      <sup>2</sup>Research Center for Information Technology Innovation, Academia Sinica, Taiwan &middot;
-      <sup>3</sup>Department of Electrical Engineering, Yuan Ze University, Taiwan
-    </p>
 
     <div class="abstract-block">
       <h2>Abstract</h2>
@@ -628,72 +624,10 @@
     </div>
   </section>
 
-  <!-- Spectrograms -->
+  <!-- Spectrograms + audio, one card per sample -->
   <section>
-    <div class="section-label">Visualization</div>
-    <h2 class="section-title">Spectrograms</h2>
-
-    <p class="fig-caption" style="margin-bottom:24px;">Log-mel spectrograms of the same evaluation sentence across the
-      systems, for all four PEL&ndash;NL pairs and three evaluation sentences. Panel order: unprocessed PEL speech, ETN-mel,
-      ETN-wavlm, ETN-elwavlm with Stage&nbsp;3-3 only (Table&nbsp;2, row&nbsp;2), ETN-elwavlm with the full schedule
-      (Table&nbsp;2, row&nbsp;5, the proposed system), and the NL reference. Panel titles use the earlier figure labels,
-      in which &ldquo;EL-WavLM&rdquo; denotes the ETN-elwavlm system. The per-panel CER is a single-sentence value and is
-      noisy; it is intended for reading the spectrograms only, and Table&nbsp;1 is the reported evidence.</p>
-
-      <div class="fig-block">
-        <img src="figure/fig2_spectrogram_cELP03v2_NL07v4_284.png" alt="Log-mel spectrograms, PEL03 &rarr; NL07, sentence 284">
-        <p class="fig-caption">PEL03 &rarr; NL07 &middot; evaluation sentence 284: 我把不用的家具送人了</p>
-      </div>
-      <div class="fig-block">
-        <img src="figure/fig2_spectrogram_cELP03v2_NL07v4_304.png" alt="Log-mel spectrograms, PEL03 &rarr; NL07, sentence 304">
-        <p class="fig-caption">PEL03 &rarr; NL07 &middot; evaluation sentence 304: 他下山時被蛇咬了一口</p>
-      </div>
-      <div class="fig-block">
-        <img src="figure/fig2_spectrogram_cELP03v2_NL07v4_318.png" alt="Log-mel spectrograms, PEL03 &rarr; NL07, sentence 318">
-        <p class="fig-caption">PEL03 &rarr; NL07 &middot; evaluation sentence 318: 這裡的風俗習慣很特別</p>
-      </div>
-      <div class="fig-block">
-        <img src="figure/fig2_spectrogram_cELP03v2_NL08v4_284.png" alt="Log-mel spectrograms, PEL03 &rarr; NL08, sentence 284">
-        <p class="fig-caption">PEL03 &rarr; NL08 &middot; evaluation sentence 284: 我把不用的家具送人了</p>
-      </div>
-      <div class="fig-block">
-        <img src="figure/fig2_spectrogram_cELP03v2_NL08v4_304.png" alt="Log-mel spectrograms, PEL03 &rarr; NL08, sentence 304">
-        <p class="fig-caption">PEL03 &rarr; NL08 &middot; evaluation sentence 304: 他下山時被蛇咬了一口</p>
-      </div>
-      <div class="fig-block">
-        <img src="figure/fig2_spectrogram_cELP03v2_NL08v4_318.png" alt="Log-mel spectrograms, PEL03 &rarr; NL08, sentence 318">
-        <p class="fig-caption">PEL03 &rarr; NL08 &middot; evaluation sentence 318: 這裡的風俗習慣很特別</p>
-      </div>
-      <div class="fig-block">
-        <img src="figure/fig2_spectrogram_cELP11v2_NL07v4_284.png" alt="Log-mel spectrograms, PEL11 &rarr; NL07, sentence 284">
-        <p class="fig-caption">PEL11 &rarr; NL07 &middot; evaluation sentence 284: 我把不用的家具送人了</p>
-      </div>
-      <div class="fig-block">
-        <img src="figure/fig2_spectrogram_cELP11v2_NL07v4_304.png" alt="Log-mel spectrograms, PEL11 &rarr; NL07, sentence 304">
-        <p class="fig-caption">PEL11 &rarr; NL07 &middot; evaluation sentence 304: 他下山時被蛇咬了一口</p>
-      </div>
-      <div class="fig-block">
-        <img src="figure/fig2_spectrogram_cELP11v2_NL07v4_318.png" alt="Log-mel spectrograms, PEL11 &rarr; NL07, sentence 318">
-        <p class="fig-caption">PEL11 &rarr; NL07 &middot; evaluation sentence 318: 這裡的風俗習慣很特別</p>
-      </div>
-      <div class="fig-block">
-        <img src="figure/fig2_spectrogram_cELP11v2_NL08v4_284.png" alt="Log-mel spectrograms, PEL11 &rarr; NL08, sentence 284">
-        <p class="fig-caption">PEL11 &rarr; NL08 &middot; evaluation sentence 284: 我把不用的家具送人了</p>
-      </div>
-      <div class="fig-block">
-        <img src="figure/fig2_spectrogram_cELP11v2_NL08v4_304.png" alt="Log-mel spectrograms, PEL11 &rarr; NL08, sentence 304">
-        <p class="fig-caption">PEL11 &rarr; NL08 &middot; evaluation sentence 304: 他下山時被蛇咬了一口</p>
-      </div>
-      <div class="fig-block">
-        <img src="figure/fig2_spectrogram_cELP11v2_NL08v4_318.png" alt="Log-mel spectrograms, PEL11 &rarr; NL08, sentence 318">
-        <p class="fig-caption">PEL11 &rarr; NL08 &middot; evaluation sentence 318: 這裡的風俗習慣很特別</p>
-      </div>
-  </section>
-
-  <!-- Audio -->
-  <section>
-    <div class="section-label">Listening</div>
-    <h2 class="section-title">Audio Samples</h2>
+    <div class="section-label">Samples</div>
+    <h2 class="section-title">Spectrograms and Audio Samples</h2>
 
     <div class="legend">
       <div class="legend-item"><div class="legend-dot" style="background:var(--pel-color)"></div>PEL (unprocessed)</div>
@@ -702,6 +636,13 @@
       <div class="legend-item"><div class="legend-dot" style="background:var(--elw-color)"></div>ETN-elwavlm (proposed)</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--nl-color)"></div>NL (reference)</div>
     </div>
+
+    <p class="fig-caption" style="margin-bottom:6px;">Each card shows one evaluation sentence: the log-mel spectrograms
+      on top and the corresponding audio below. Spectrogram panel order: unprocessed PEL speech, ETN-mel, ETN-wavlm,
+      ETN-elwavlm with Stage&nbsp;3-3 only (Table&nbsp;2, row&nbsp;2), ETN-elwavlm with the full schedule
+      (Table&nbsp;2, row&nbsp;5, the proposed system), and the NL reference. Panel titles use the earlier figure labels,
+      in which &ldquo;EL-WavLM&rdquo; denotes the ETN-elwavlm system. The per-panel CER is a single-sentence value and is
+      noisy; it is intended for reading the spectrograms only, and Table&nbsp;1 is the reported evidence.</p>
 
     <p class="fig-caption" style="margin-bottom:8px;">All converted samples are taken after Stage&nbsp;4 (o2o
       patient-specific adaptation), from the same loudness-normalised waveforms used for the objective evaluation.
@@ -713,6 +654,9 @@
           <span class="sample-num">Sentence 284</span>
           <span class="transcript">我把不用的家具送人了</span>
           <span class="sample-note">PEL03 &rarr; NL07 &middot; after Stage 4 (o2o)</span>
+        </div>
+        <div class="sample-spec">
+          <img src="figure/fig2_spectrogram_cELP03v2_NL07v4_284.png" alt="Log-mel spectrograms, PEL03 &rarr; NL07, sentence 284">
         </div>
         <div class="audio-rows">
           <div class="audio-row">
@@ -743,6 +687,9 @@
           <span class="transcript">他下山時被蛇咬了一口</span>
           <span class="sample-note">PEL03 &rarr; NL07 &middot; after Stage 4 (o2o)</span>
         </div>
+        <div class="sample-spec">
+          <img src="figure/fig2_spectrogram_cELP03v2_NL07v4_304.png" alt="Log-mel spectrograms, PEL03 &rarr; NL07, sentence 304">
+        </div>
         <div class="audio-rows">
           <div class="audio-row">
             <span class="model-tag tag-pel">PEL (unprocessed)</span>
@@ -771,6 +718,9 @@
           <span class="sample-num">Sentence 318</span>
           <span class="transcript">這裡的風俗習慣很特別</span>
           <span class="sample-note">PEL03 &rarr; NL07 &middot; after Stage 4 (o2o)</span>
+        </div>
+        <div class="sample-spec">
+          <img src="figure/fig2_spectrogram_cELP03v2_NL07v4_318.png" alt="Log-mel spectrograms, PEL03 &rarr; NL07, sentence 318">
         </div>
         <div class="audio-rows">
           <div class="audio-row">
@@ -802,6 +752,9 @@
           <span class="transcript">我把不用的家具送人了</span>
           <span class="sample-note">PEL03 &rarr; NL08 &middot; after Stage 4 (o2o)</span>
         </div>
+        <div class="sample-spec">
+          <img src="figure/fig2_spectrogram_cELP03v2_NL08v4_284.png" alt="Log-mel spectrograms, PEL03 &rarr; NL08, sentence 284">
+        </div>
         <div class="audio-rows">
           <div class="audio-row">
             <span class="model-tag tag-pel">PEL (unprocessed)</span>
@@ -831,6 +784,9 @@
           <span class="transcript">他下山時被蛇咬了一口</span>
           <span class="sample-note">PEL03 &rarr; NL08 &middot; after Stage 4 (o2o)</span>
         </div>
+        <div class="sample-spec">
+          <img src="figure/fig2_spectrogram_cELP03v2_NL08v4_304.png" alt="Log-mel spectrograms, PEL03 &rarr; NL08, sentence 304">
+        </div>
         <div class="audio-rows">
           <div class="audio-row">
             <span class="model-tag tag-pel">PEL (unprocessed)</span>
@@ -859,6 +815,9 @@
           <span class="sample-num">Sentence 318</span>
           <span class="transcript">這裡的風俗習慣很特別</span>
           <span class="sample-note">PEL03 &rarr; NL08 &middot; after Stage 4 (o2o)</span>
+        </div>
+        <div class="sample-spec">
+          <img src="figure/fig2_spectrogram_cELP03v2_NL08v4_318.png" alt="Log-mel spectrograms, PEL03 &rarr; NL08, sentence 318">
         </div>
         <div class="audio-rows">
           <div class="audio-row">
@@ -890,6 +849,9 @@
           <span class="transcript">我把不用的家具送人了</span>
           <span class="sample-note">PEL11 &rarr; NL07 &middot; after Stage 4 (o2o)</span>
         </div>
+        <div class="sample-spec">
+          <img src="figure/fig2_spectrogram_cELP11v2_NL07v4_284.png" alt="Log-mel spectrograms, PEL11 &rarr; NL07, sentence 284">
+        </div>
         <div class="audio-rows">
           <div class="audio-row">
             <span class="model-tag tag-pel">PEL (unprocessed)</span>
@@ -919,6 +881,9 @@
           <span class="transcript">他下山時被蛇咬了一口</span>
           <span class="sample-note">PEL11 &rarr; NL07 &middot; after Stage 4 (o2o)</span>
         </div>
+        <div class="sample-spec">
+          <img src="figure/fig2_spectrogram_cELP11v2_NL07v4_304.png" alt="Log-mel spectrograms, PEL11 &rarr; NL07, sentence 304">
+        </div>
         <div class="audio-rows">
           <div class="audio-row">
             <span class="model-tag tag-pel">PEL (unprocessed)</span>
@@ -947,6 +912,9 @@
           <span class="sample-num">Sentence 318</span>
           <span class="transcript">這裡的風俗習慣很特別</span>
           <span class="sample-note">PEL11 &rarr; NL07 &middot; after Stage 4 (o2o)</span>
+        </div>
+        <div class="sample-spec">
+          <img src="figure/fig2_spectrogram_cELP11v2_NL07v4_318.png" alt="Log-mel spectrograms, PEL11 &rarr; NL07, sentence 318">
         </div>
         <div class="audio-rows">
           <div class="audio-row">
@@ -978,6 +946,9 @@
           <span class="transcript">我把不用的家具送人了</span>
           <span class="sample-note">PEL11 &rarr; NL08 &middot; after Stage 4 (o2o)</span>
         </div>
+        <div class="sample-spec">
+          <img src="figure/fig2_spectrogram_cELP11v2_NL08v4_284.png" alt="Log-mel spectrograms, PEL11 &rarr; NL08, sentence 284">
+        </div>
         <div class="audio-rows">
           <div class="audio-row">
             <span class="model-tag tag-pel">PEL (unprocessed)</span>
@@ -1007,6 +978,9 @@
           <span class="transcript">他下山時被蛇咬了一口</span>
           <span class="sample-note">PEL11 &rarr; NL08 &middot; after Stage 4 (o2o)</span>
         </div>
+        <div class="sample-spec">
+          <img src="figure/fig2_spectrogram_cELP11v2_NL08v4_304.png" alt="Log-mel spectrograms, PEL11 &rarr; NL08, sentence 304">
+        </div>
         <div class="audio-rows">
           <div class="audio-row">
             <span class="model-tag tag-pel">PEL (unprocessed)</span>
@@ -1035,6 +1009,9 @@
           <span class="sample-num">Sentence 318</span>
           <span class="transcript">這裡的風俗習慣很特別</span>
           <span class="sample-note">PEL11 &rarr; NL08 &middot; after Stage 4 (o2o)</span>
+        </div>
+        <div class="sample-spec">
+          <img src="figure/fig2_spectrogram_cELP11v2_NL08v4_318.png" alt="Log-mel spectrograms, PEL11 &rarr; NL08, sentence 318">
         </div>
         <div class="audio-rows">
           <div class="audio-row">

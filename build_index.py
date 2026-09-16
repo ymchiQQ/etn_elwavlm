@@ -83,16 +83,23 @@ ROWS = [
 ]
 
 
-def audio_blocks():
+def sample_blocks():
+    """每一個 sample（配對 × 句子）出一張卡片：**頻譜圖在上、試聽在下**，
+    同一句的兩種素材接在一起（使用者 2026-09-16 要求，原本是頻譜圖與試聽
+    各自獨立一節、要上下捲很遠才對得起來）。"""
     out = []
     for pair, pair_label, trg in PAIRS:
+        pat, trg_dir = pair.split("-")
         out.append(f'      <div class="pair-label">{pair_label}</div>')
         for utt in UTTS:
+            spec = f"figure/fig2_spectrogram_{pat}_{trg_dir}_{utt}.png"
+            if not os.path.exists(os.path.join(HERE, spec)):
+                raise SystemExit(f"缺少頻譜圖：{spec}")
+
             rows = []
             for name, cls, tmpl in ROWS:
                 src = tmpl.format(pair=pair, trg=trg, utt=utt)
-                path = os.path.join(HERE, src)
-                if not os.path.exists(path):        # 缺檔就不畫空播放器
+                if not os.path.exists(os.path.join(HERE, src)):   # 缺檔就不畫空播放器
                     raise SystemExit(f"缺少音檔：{src}")
                 rows.append(
                     '          <div class="audio-row">\n'
@@ -101,6 +108,7 @@ def audio_blocks():
                     '          </div>'
                 )
             rows_html = "\n".join(rows)
+
             out.append(
                 '      <div class="sample-block">\n'
                 '        <div class="sample-header">\n'
@@ -108,28 +116,12 @@ def audio_blocks():
                 f'          <span class="transcript">{TMHINT[utt]}</span>\n'
                 f'          <span class="sample-note">{pair_label} &middot; after Stage 4 (o2o)</span>\n'
                 '        </div>\n'
+                '        <div class="sample-spec">\n'
+                f'          <img src="{spec}" alt="Log-mel spectrograms, {pair_label}, sentence {utt}">\n'
+                '        </div>\n'
                 '        <div class="audio-rows">\n'
                 f'{rows_html}\n'
                 '        </div>\n'
-                '      </div>'
-            )
-    return "\n".join(out)
-
-
-def spec_gallery():
-    out = []
-    for pair, pair_label, _ in PAIRS:
-        pat = pair.split("-")[0]
-        trg = pair.split("-")[1]
-        for utt in UTTS:
-            fn = f"figure/fig2_spectrogram_{pat}_{trg}_{utt}.png"
-            if not os.path.exists(os.path.join(HERE, fn)):
-                raise SystemExit(f"缺少頻譜圖：{fn}")
-            out.append(
-                '      <div class="fig-block">\n'
-                f'        <img src="{fn}" alt="Log-mel spectrograms, {pair_label}, sentence {utt}">\n'
-                f'        <p class="fig-caption">{pair_label} &middot; evaluation sentence {utt}: '
-                f'{TMHINT[utt]}</p>\n'
                 '      </div>'
             )
     return "\n".join(out)
@@ -204,13 +196,6 @@ CSS = """
     }
 
     h1 span { color: var(--accent); }
-
-    .authors {
-      margin-top: 18px;
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.7;
-    }
 
     .abstract-block {
       margin-top: 32px;
@@ -392,6 +377,15 @@ CSS = """
     .sample-note { font-size: 12px; color: var(--text-muted); font-style: italic; }
     .transcript { font-size: 14px; color: #1e293b; }
 
+    /* 卡片內的頻譜圖：跟下面的試聽同屬一張卡，之間畫一條分隔線 */
+    .sample-spec {
+      padding: 14px 20px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+      background: #fff;
+    }
+    .sample-spec img { max-width: 100%; border-radius: 3px; }
+
     .audio-rows { padding: 4px 0; }
     .audio-row {
       display: grid;
@@ -459,12 +453,6 @@ def build():
   <header>
     <div class="tag-line">Audio Demo &middot; Electrolaryngeal Speech Enhancement</div>
     <h1><span>EL-WavLM</span>: Staged Fine-Tuning of Self-Supervised Speech Encoders for Electrolaryngeal Speech Enhancement</h1>
-    <p class="authors">
-      Ming-Chi Yen<sup>1</sup>, Hsin-Te Hwang<sup>2</sup>, Chen-Chou Lo<sup>3</sup>, Yu Tsao<sup>2</sup>, Hsin-Min Wang<sup>1</sup><br>
-      <sup>1</sup>Institute of Information Science, Academia Sinica, Taiwan &middot;
-      <sup>2</sup>Research Center for Information Technology Innovation, Academia Sinica, Taiwan &middot;
-      <sup>3</sup>Department of Electrical Engineering, Yuan Ze University, Taiwan
-    </p>
 
     <div class="abstract-block">
       <h2>Abstract</h2>
@@ -769,25 +757,10 @@ def build():
     </div>
   </section>
 
-  <!-- Spectrograms -->
+  <!-- Spectrograms + audio, one card per sample -->
   <section>
-    <div class="section-label">Visualization</div>
-    <h2 class="section-title">Spectrograms</h2>
-
-    <p class="fig-caption" style="margin-bottom:24px;">Log-mel spectrograms of the same evaluation sentence across the
-      systems, for all four PEL&ndash;NL pairs and three evaluation sentences. Panel order: unprocessed PEL speech, ETN-mel,
-      ETN-wavlm, ETN-elwavlm with Stage&nbsp;3-3 only (Table&nbsp;2, row&nbsp;2), ETN-elwavlm with the full schedule
-      (Table&nbsp;2, row&nbsp;5, the proposed system), and the NL reference. Panel titles use the earlier figure labels,
-      in which &ldquo;EL-WavLM&rdquo; denotes the ETN-elwavlm system. The per-panel CER is a single-sentence value and is
-      noisy; it is intended for reading the spectrograms only, and Table&nbsp;1 is the reported evidence.</p>
-
-{spec_gallery()}
-  </section>
-
-  <!-- Audio -->
-  <section>
-    <div class="section-label">Listening</div>
-    <h2 class="section-title">Audio Samples</h2>
+    <div class="section-label">Samples</div>
+    <h2 class="section-title">Spectrograms and Audio Samples</h2>
 
     <div class="legend">
       <div class="legend-item"><div class="legend-dot" style="background:var(--pel-color)"></div>PEL (unprocessed)</div>
@@ -797,11 +770,18 @@ def build():
       <div class="legend-item"><div class="legend-dot" style="background:var(--nl-color)"></div>NL (reference)</div>
     </div>
 
+    <p class="fig-caption" style="margin-bottom:6px;">Each card shows one evaluation sentence: the log-mel spectrograms
+      on top and the corresponding audio below. Spectrogram panel order: unprocessed PEL speech, ETN-mel, ETN-wavlm,
+      ETN-elwavlm with Stage&nbsp;3-3 only (Table&nbsp;2, row&nbsp;2), ETN-elwavlm with the full schedule
+      (Table&nbsp;2, row&nbsp;5, the proposed system), and the NL reference. Panel titles use the earlier figure labels,
+      in which &ldquo;EL-WavLM&rdquo; denotes the ETN-elwavlm system. The per-panel CER is a single-sentence value and is
+      noisy; it is intended for reading the spectrograms only, and Table&nbsp;1 is the reported evidence.</p>
+
     <p class="fig-caption" style="margin-bottom:8px;">All converted samples are taken after Stage&nbsp;4 (o2o
       patient-specific adaptation), from the same loudness-normalised waveforms used for the objective evaluation.
       The PEL and NL rows are the unprocessed patient recording and the natural reference of the same sentence.</p>
 
-{audio_blocks()}
+{sample_blocks()}
   </section>
 
   <footer>
