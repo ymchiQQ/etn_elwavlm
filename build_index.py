@@ -32,7 +32,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # TMHINT 句表：一行一句，行號＝句號（1–320）。使用者 2026-09-16 指出這個檔案的存在。
 # **只讀不複製**：產生出來的 index.html 只帶用到的那三句，不把整份 320 句的句表
 # 放進這個公開 repo。核對過三句與 data/NL07v4_eval/text 的音素標註一致
-# （284 我把不用的家具送人了 / 304 他下山時被蛇咬了一口 / 318 這裡的風俗習慣很特別）。
+# （287 那個牆上掛著一幅油畫 / 304 他下山時被蛇咬了一口 / 318 這裡的風俗習慣很特別）。
 TMHINT_TXT = os.path.join(
     "/mnt/md2/user_ymchiqq/espnet/egs/tmhint/etn_baseline/downloads", "tmhint.txt")
 
@@ -71,7 +71,7 @@ PAIRS = [
     ("cELP11v2-NL07v4", "PEL11 &rarr; NL07", "NL07v4"),
     ("cELP11v2-NL08v4", "PEL11 &rarr; NL08", "NL08v4"),
 ]
-UTTS = ["284", "304", "318"]
+UTTS = ["287", "304", "318"]
 
 # 試聽列：(顯示名, css class, 檔名樣板)；樣板的 {pair}/{trg}/{utt} 由下面填。
 ROWS = [
@@ -95,6 +95,14 @@ def sample_blocks():
             spec = f"figure/fig2_spectrogram_{pat}_{trg_dir}_{utt}.png"
             if not os.path.exists(os.path.join(HERE, spec)):
                 raise SystemExit(f"缺少頻譜圖：{spec}")
+            # 單句 t-SNE 與論文 Fig. 2 同一套規則：encoder 空間、三格（frozen／3-3 only／
+            # full schedule）、after-Stage-3 checkpoint。一張圖同時含兩位病人（上 PEL03、
+            # 下 PEL11），所以同一個目標語者的兩張卡片共用同一張圖，圖說指出這張卡片是哪一列。
+            tsne = f"figure/fig2_tsne_{trg_dir}_{utt}.png"
+            if not os.path.exists(os.path.join(HERE, tsne)):
+                raise SystemExit(f"缺少 t-SNE 圖：{tsne}")
+            row_of = {"cELP03v2": "top row", "cELP11v2": "bottom row"}[pat]
+            pat_disp = {"cELP03v2": "PEL03", "cELP11v2": "PEL11"}[pat]
 
             rows = []
             for name, cls, tmpl in ROWS:
@@ -118,6 +126,11 @@ def sample_blocks():
                 '        </div>\n'
                 '        <div class="sample-spec">\n'
                 f'          <img src="{spec}" alt="Log-mel spectrograms, {pair_label}, sentence {utt}">\n'
+                '        </div>\n'
+                '        <div class="sample-spec sample-tsne">\n'
+                f'          <img src="{tsne}" alt="Encoder-space t-SNE, sentence {utt}, towards {trg_dir[:4]}">\n'
+                '          <div class="fig-note">Encoder space, all frames of this sentence &mdash; '
+                f'{pat_disp} is the {row_of}.</div>\n'
                 '        </div>\n'
                 '        <div class="audio-rows">\n'
                 f'{rows_html}\n'
@@ -385,6 +398,13 @@ CSS = """
       background: #fff;
     }
     .sample-spec img { max-width: 100%; border-radius: 3px; }
+    /* 同一張卡的第二張圖：單句 t-SNE（兩位病人同圖，圖說指出這張卡是哪一列） */
+    .sample-tsne { padding-top: 6px; }
+    .sample-tsne .fig-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
 
     .audio-rows { padding: 4px 0; }
     .audio-row {

@@ -263,6 +263,13 @@
       background: #fff;
     }
     .sample-spec img { max-width: 100%; border-radius: 3px; }
+    /* 同一張卡的第二張圖：單句 t-SNE（兩位病人同圖，圖說指出這張卡是哪一列） */
+    .sample-tsne { padding-top: 6px; }
+    .sample-tsne .fig-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
 
     .audio-rows { padding: 4px 0; }
     .audio-row {
@@ -651,33 +658,37 @@
       <div class="pair-label">PEL03 &rarr; NL07</div>
       <div class="sample-block">
         <div class="sample-header">
-          <span class="sample-num">Sentence 284</span>
-          <span class="transcript">我把不用的家具送人了</span>
+          <span class="sample-num">Sentence 287</span>
+          <span class="transcript">那個牆上掛著一幅油畫</span>
           <span class="sample-note">PEL03 &rarr; NL07 &middot; after Stage 4 (o2o)</span>
         </div>
         <div class="sample-spec">
-          <img src="figure/fig2_spectrogram_cELP03v2_NL07v4_284.png" alt="Log-mel spectrograms, PEL03 &rarr; NL07, sentence 284">
+          <img src="figure/fig2_spectrogram_cELP03v2_NL07v4_287.png" alt="Log-mel spectrograms, PEL03 &rarr; NL07, sentence 287">
+        </div>
+        <div class="sample-spec sample-tsne">
+          <img src="figure/fig2_tsne_NL07v4_287.png" alt="Encoder-space t-SNE, sentence 287, towards NL07">
+          <div class="fig-note">Encoder space, all frames of this sentence &mdash; PEL03 is the top row.</div>
         </div>
         <div class="audio-rows">
           <div class="audio-row">
             <span class="model-tag tag-pel">PEL (unprocessed)</span>
-            <audio controls preload="none"><source src="audio/anchor_pel_raw_cELP03v2-NL07v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/anchor_pel_raw_cELP03v2-NL07v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-mel">ETN-mel</span>
-            <audio controls preload="none"><source src="audio/etn_mel_s4_o2o_cELP03v2-NL07v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/etn_mel_s4_o2o_cELP03v2-NL07v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-wavlm">ETN-wavlm</span>
-            <audio controls preload="none"><source src="audio/etn_wavlm_s4_o2o_cELP03v2-NL07v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/etn_wavlm_s4_o2o_cELP03v2-NL07v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-elw">ETN-elwavlm</span>
-            <audio controls preload="none"><source src="audio/elw_a5_s4_o2o_cELP03v2-NL07v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/elw_a5_s4_o2o_cELP03v2-NL07v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-nl">NL (reference)</span>
-            <audio controls preload="none"><source src="audio/anchor_nl_ref_NL07v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/anchor_nl_ref_NL07v4_287.wav" type="audio/wav"></audio>
           </div>
         </div>
       </div>
@@ -689,6 +700,10 @@
         </div>
         <div class="sample-spec">
           <img src="figure/fig2_spectrogram_cELP03v2_NL07v4_304.png" alt="Log-mel spectrograms, PEL03 &rarr; NL07, sentence 304">
+        </div>
+        <div class="sample-spec sample-tsne">
+          <img src="figure/fig2_tsne_NL07v4_304.png" alt="Encoder-space t-SNE, sentence 304, towards NL07">
+          <div class="fig-note">Encoder space, all frames of this sentence &mdash; PEL03 is the top row.</div>
         </div>
         <div class="audio-rows">
           <div class="audio-row">
@@ -722,6 +737,10 @@
         <div class="sample-spec">
           <img src="figure/fig2_spectrogram_cELP03v2_NL07v4_318.png" alt="Log-mel spectrograms, PEL03 &rarr; NL07, sentence 318">
         </div>
+        <div class="sample-spec sample-tsne">
+          <img src="figure/fig2_tsne_NL07v4_318.png" alt="Encoder-space t-SNE, sentence 318, towards NL07">
+          <div class="fig-note">Encoder space, all frames of this sentence &mdash; PEL03 is the top row.</div>
+        </div>
         <div class="audio-rows">
           <div class="audio-row">
             <span class="model-tag tag-pel">PEL (unprocessed)</span>
@@ -748,33 +767,37 @@
       <div class="pair-label">PEL03 &rarr; NL08</div>
       <div class="sample-block">
         <div class="sample-header">
-          <span class="sample-num">Sentence 284</span>
-          <span class="transcript">我把不用的家具送人了</span>
+          <span class="sample-num">Sentence 287</span>
+          <span class="transcript">那個牆上掛著一幅油畫</span>
           <span class="sample-note">PEL03 &rarr; NL08 &middot; after Stage 4 (o2o)</span>
         </div>
         <div class="sample-spec">
-          <img src="figure/fig2_spectrogram_cELP03v2_NL08v4_284.png" alt="Log-mel spectrograms, PEL03 &rarr; NL08, sentence 284">
+          <img src="figure/fig2_spectrogram_cELP03v2_NL08v4_287.png" alt="Log-mel spectrograms, PEL03 &rarr; NL08, sentence 287">
+        </div>
+        <div class="sample-spec sample-tsne">
+          <img src="figure/fig2_tsne_NL08v4_287.png" alt="Encoder-space t-SNE, sentence 287, towards NL08">
+          <div class="fig-note">Encoder space, all frames of this sentence &mdash; PEL03 is the top row.</div>
         </div>
         <div class="audio-rows">
           <div class="audio-row">
             <span class="model-tag tag-pel">PEL (unprocessed)</span>
-            <audio controls preload="none"><source src="audio/anchor_pel_raw_cELP03v2-NL08v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/anchor_pel_raw_cELP03v2-NL08v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-mel">ETN-mel</span>
-            <audio controls preload="none"><source src="audio/etn_mel_s4_o2o_cELP03v2-NL08v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/etn_mel_s4_o2o_cELP03v2-NL08v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-wavlm">ETN-wavlm</span>
-            <audio controls preload="none"><source src="audio/etn_wavlm_s4_o2o_cELP03v2-NL08v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/etn_wavlm_s4_o2o_cELP03v2-NL08v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-elw">ETN-elwavlm</span>
-            <audio controls preload="none"><source src="audio/elw_a5_s4_o2o_cELP03v2-NL08v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/elw_a5_s4_o2o_cELP03v2-NL08v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-nl">NL (reference)</span>
-            <audio controls preload="none"><source src="audio/anchor_nl_ref_NL08v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/anchor_nl_ref_NL08v4_287.wav" type="audio/wav"></audio>
           </div>
         </div>
       </div>
@@ -786,6 +809,10 @@
         </div>
         <div class="sample-spec">
           <img src="figure/fig2_spectrogram_cELP03v2_NL08v4_304.png" alt="Log-mel spectrograms, PEL03 &rarr; NL08, sentence 304">
+        </div>
+        <div class="sample-spec sample-tsne">
+          <img src="figure/fig2_tsne_NL08v4_304.png" alt="Encoder-space t-SNE, sentence 304, towards NL08">
+          <div class="fig-note">Encoder space, all frames of this sentence &mdash; PEL03 is the top row.</div>
         </div>
         <div class="audio-rows">
           <div class="audio-row">
@@ -819,6 +846,10 @@
         <div class="sample-spec">
           <img src="figure/fig2_spectrogram_cELP03v2_NL08v4_318.png" alt="Log-mel spectrograms, PEL03 &rarr; NL08, sentence 318">
         </div>
+        <div class="sample-spec sample-tsne">
+          <img src="figure/fig2_tsne_NL08v4_318.png" alt="Encoder-space t-SNE, sentence 318, towards NL08">
+          <div class="fig-note">Encoder space, all frames of this sentence &mdash; PEL03 is the top row.</div>
+        </div>
         <div class="audio-rows">
           <div class="audio-row">
             <span class="model-tag tag-pel">PEL (unprocessed)</span>
@@ -845,33 +876,37 @@
       <div class="pair-label">PEL11 &rarr; NL07</div>
       <div class="sample-block">
         <div class="sample-header">
-          <span class="sample-num">Sentence 284</span>
-          <span class="transcript">我把不用的家具送人了</span>
+          <span class="sample-num">Sentence 287</span>
+          <span class="transcript">那個牆上掛著一幅油畫</span>
           <span class="sample-note">PEL11 &rarr; NL07 &middot; after Stage 4 (o2o)</span>
         </div>
         <div class="sample-spec">
-          <img src="figure/fig2_spectrogram_cELP11v2_NL07v4_284.png" alt="Log-mel spectrograms, PEL11 &rarr; NL07, sentence 284">
+          <img src="figure/fig2_spectrogram_cELP11v2_NL07v4_287.png" alt="Log-mel spectrograms, PEL11 &rarr; NL07, sentence 287">
+        </div>
+        <div class="sample-spec sample-tsne">
+          <img src="figure/fig2_tsne_NL07v4_287.png" alt="Encoder-space t-SNE, sentence 287, towards NL07">
+          <div class="fig-note">Encoder space, all frames of this sentence &mdash; PEL11 is the bottom row.</div>
         </div>
         <div class="audio-rows">
           <div class="audio-row">
             <span class="model-tag tag-pel">PEL (unprocessed)</span>
-            <audio controls preload="none"><source src="audio/anchor_pel_raw_cELP11v2-NL07v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/anchor_pel_raw_cELP11v2-NL07v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-mel">ETN-mel</span>
-            <audio controls preload="none"><source src="audio/etn_mel_s4_o2o_cELP11v2-NL07v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/etn_mel_s4_o2o_cELP11v2-NL07v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-wavlm">ETN-wavlm</span>
-            <audio controls preload="none"><source src="audio/etn_wavlm_s4_o2o_cELP11v2-NL07v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/etn_wavlm_s4_o2o_cELP11v2-NL07v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-elw">ETN-elwavlm</span>
-            <audio controls preload="none"><source src="audio/elw_a5_s4_o2o_cELP11v2-NL07v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/elw_a5_s4_o2o_cELP11v2-NL07v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-nl">NL (reference)</span>
-            <audio controls preload="none"><source src="audio/anchor_nl_ref_NL07v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/anchor_nl_ref_NL07v4_287.wav" type="audio/wav"></audio>
           </div>
         </div>
       </div>
@@ -883,6 +918,10 @@
         </div>
         <div class="sample-spec">
           <img src="figure/fig2_spectrogram_cELP11v2_NL07v4_304.png" alt="Log-mel spectrograms, PEL11 &rarr; NL07, sentence 304">
+        </div>
+        <div class="sample-spec sample-tsne">
+          <img src="figure/fig2_tsne_NL07v4_304.png" alt="Encoder-space t-SNE, sentence 304, towards NL07">
+          <div class="fig-note">Encoder space, all frames of this sentence &mdash; PEL11 is the bottom row.</div>
         </div>
         <div class="audio-rows">
           <div class="audio-row">
@@ -916,6 +955,10 @@
         <div class="sample-spec">
           <img src="figure/fig2_spectrogram_cELP11v2_NL07v4_318.png" alt="Log-mel spectrograms, PEL11 &rarr; NL07, sentence 318">
         </div>
+        <div class="sample-spec sample-tsne">
+          <img src="figure/fig2_tsne_NL07v4_318.png" alt="Encoder-space t-SNE, sentence 318, towards NL07">
+          <div class="fig-note">Encoder space, all frames of this sentence &mdash; PEL11 is the bottom row.</div>
+        </div>
         <div class="audio-rows">
           <div class="audio-row">
             <span class="model-tag tag-pel">PEL (unprocessed)</span>
@@ -942,33 +985,37 @@
       <div class="pair-label">PEL11 &rarr; NL08</div>
       <div class="sample-block">
         <div class="sample-header">
-          <span class="sample-num">Sentence 284</span>
-          <span class="transcript">我把不用的家具送人了</span>
+          <span class="sample-num">Sentence 287</span>
+          <span class="transcript">那個牆上掛著一幅油畫</span>
           <span class="sample-note">PEL11 &rarr; NL08 &middot; after Stage 4 (o2o)</span>
         </div>
         <div class="sample-spec">
-          <img src="figure/fig2_spectrogram_cELP11v2_NL08v4_284.png" alt="Log-mel spectrograms, PEL11 &rarr; NL08, sentence 284">
+          <img src="figure/fig2_spectrogram_cELP11v2_NL08v4_287.png" alt="Log-mel spectrograms, PEL11 &rarr; NL08, sentence 287">
+        </div>
+        <div class="sample-spec sample-tsne">
+          <img src="figure/fig2_tsne_NL08v4_287.png" alt="Encoder-space t-SNE, sentence 287, towards NL08">
+          <div class="fig-note">Encoder space, all frames of this sentence &mdash; PEL11 is the bottom row.</div>
         </div>
         <div class="audio-rows">
           <div class="audio-row">
             <span class="model-tag tag-pel">PEL (unprocessed)</span>
-            <audio controls preload="none"><source src="audio/anchor_pel_raw_cELP11v2-NL08v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/anchor_pel_raw_cELP11v2-NL08v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-mel">ETN-mel</span>
-            <audio controls preload="none"><source src="audio/etn_mel_s4_o2o_cELP11v2-NL08v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/etn_mel_s4_o2o_cELP11v2-NL08v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-wavlm">ETN-wavlm</span>
-            <audio controls preload="none"><source src="audio/etn_wavlm_s4_o2o_cELP11v2-NL08v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/etn_wavlm_s4_o2o_cELP11v2-NL08v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-elw">ETN-elwavlm</span>
-            <audio controls preload="none"><source src="audio/elw_a5_s4_o2o_cELP11v2-NL08v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/elw_a5_s4_o2o_cELP11v2-NL08v4_287.wav" type="audio/wav"></audio>
           </div>
           <div class="audio-row">
             <span class="model-tag tag-nl">NL (reference)</span>
-            <audio controls preload="none"><source src="audio/anchor_nl_ref_NL08v4_284.wav" type="audio/wav"></audio>
+            <audio controls preload="none"><source src="audio/anchor_nl_ref_NL08v4_287.wav" type="audio/wav"></audio>
           </div>
         </div>
       </div>
@@ -980,6 +1027,10 @@
         </div>
         <div class="sample-spec">
           <img src="figure/fig2_spectrogram_cELP11v2_NL08v4_304.png" alt="Log-mel spectrograms, PEL11 &rarr; NL08, sentence 304">
+        </div>
+        <div class="sample-spec sample-tsne">
+          <img src="figure/fig2_tsne_NL08v4_304.png" alt="Encoder-space t-SNE, sentence 304, towards NL08">
+          <div class="fig-note">Encoder space, all frames of this sentence &mdash; PEL11 is the bottom row.</div>
         </div>
         <div class="audio-rows">
           <div class="audio-row">
@@ -1012,6 +1063,10 @@
         </div>
         <div class="sample-spec">
           <img src="figure/fig2_spectrogram_cELP11v2_NL08v4_318.png" alt="Log-mel spectrograms, PEL11 &rarr; NL08, sentence 318">
+        </div>
+        <div class="sample-spec sample-tsne">
+          <img src="figure/fig2_tsne_NL08v4_318.png" alt="Encoder-space t-SNE, sentence 318, towards NL08">
+          <div class="fig-note">Encoder space, all frames of this sentence &mdash; PEL11 is the bottom row.</div>
         </div>
         <div class="audio-rows">
           <div class="audio-row">
