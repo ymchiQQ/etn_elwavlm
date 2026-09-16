@@ -1,0 +1,822 @@
+#!/usr/bin/env python3
+"""產生 github_demo/etn_elwavlm/index.html（ETN-elwavlm / EL-WavLM demo 頁）。
+
+版面與 CSS 沿用 `github_demo/nelvc_demo/index.html`（使用者指定「根據 nelvc_demo
+建立」），只換成本論文的系統、表格與素材。重複的區塊（12 組試聽、12 張頻譜圖）
+由這支腳本產生，避免手打 60 個檔名打錯。
+
+**內容來源（不自己算數字）**
+- 標題／摘要／方法／設定敘述：`espnet/egs/tmhint/etn_baseline/ICASSP2027_elw/main.tex`
+- 三張表格：main.tex 的 `tab:main`／`tab:curriculum`／`tab:loss`，數字與粗體
+  （每欄最佳值）逐格照抄，不重算、不補充草稿沒有的數字。
+- 圖檔／音檔：`downloads/ICASSP2027_elw/`（使用者指定來源）
+  - `plot/tsne/fig3a_tsne_frame_encoder_l24_NL07v4_s3.png` → 論文 Fig. 2
+  - `result_csv/fig/paper/fig1_flow_paper_f3.png` → 論文 Fig. 1（f3 版）
+  - `plot/spec/fig2_spectrogram_*.png` → 六格頻譜圖（12 張，四配對 × 三句）
+  - `plot/audio/*.wav` → 試聽音檔（−24 LUFS，與評估用的是同一份）
+
+**模型範圍（使用者硬性要求：不可超過本論文比較的範圍）**
+- 試聽區只放 `tab:main` 的三個系統（ETN-mel／ETN-wavlm／ETN-elwavlm）＋兩個
+  論文正文自己引用的參考錄音（未轉換的 PEL、NL 真值）。`elw_a2`（Stage 3-3 only）
+  的音檔**已從 audio/ 移除**，不在試聽區出現。
+- 頻譜圖與 t-SNE 是論文既有圖的原樣重現，其中的 Stage-3-3-only 面板對應
+  `tab:curriculum` 第 2 列，仍在論文比較範圍內；caption 會標明對應關係與
+  舊圖例名稱（圖上寫 "EL-WavLM"，論文現行系統名是 ETN-elwavlm）。
+
+用法：在本目錄下 `python build_index.py`，重寫 index.html。
+"""
+import os
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+# TMHINT 句表：一行一句，行號＝句號（1–320）。使用者 2026-09-16 指出這個檔案的存在。
+# **只讀不複製**：產生出來的 index.html 只帶用到的那三句，不把整份 320 句的句表
+# 放進這個公開 repo。核對過三句與 data/NL07v4_eval/text 的音素標註一致
+# （284 我把不用的家具送人了 / 304 他下山時被蛇咬了一口 / 318 這裡的風俗習慣很特別）。
+TMHINT_TXT = os.path.join(
+    "/mnt/md2/user_ymchiqq/espnet/egs/tmhint/etn_baseline/downloads", "tmhint.txt")
+
+
+def load_tmhint():
+    with open(TMHINT_TXT, encoding="utf-8") as f:
+        lines = [l.strip() for l in f if l.strip()]
+    if len(lines) != 320:
+        raise SystemExit(f"tmhint.txt 應該是 320 句，讀到 {len(lines)} 句")
+    return {str(i + 1): s for i, s in enumerate(lines)}
+
+
+TMHINT = load_tmhint()
+
+TITLE = ("EL-WavLM: Staged Fine-Tuning of Self-Supervised Speech Encoders "
+         "for Electrolaryngeal Speech Enhancement")
+
+ABSTRACT = (
+    "Electrolaryngeal (EL) speech enhancement aims to improve the intelligibility of EL speech and make it "
+    "closer to natural (NL) speech. Voice conversion (VC) is one approach. Self-supervised learning (SSL) "
+    "models are primarily used as frozen feature extractors for VC and are rarely fine-tuned for EL speech, "
+    "which is extremely challenging due to the scarcity of patient EL data. We propose EL-WavLM, a "
+    "WavLM-Large encoder adapted to simulated EL (SEL) data through staged fine-tuning (optionally with the "
+    "addition of a teacher loss), to replace the encoder of the electrolaryngeal speech transformer network "
+    "(ETN). The resulting system ETN-elwavlm is then adapted for each patient&rsquo;s EL (PEL) speech. Two ETN "
+    "baselines are used, one with mel-spectrograms (ETN-mel) and the other with frozen WavLM features "
+    "(ETN-wavlm). With only SEL&ndash;NL fine-tuning, ETN-elwavlm achieved a Whisper character error rate "
+    "(W-CER) of 65.1% on the PEL&ndash;NL pairs; after PEL&ndash;NL adaptation, the best setting (full staged "
+    "fine-tuning without teacher loss) reached 62.5%, compared to 88.3% for ETN-mel and 82.8% for ETN-wavlm."
+)
+
+# (pair 目錄字串, 顯示名稱)
+PAIRS = [
+    ("cELP03v2-NL07v4", "PEL03 &rarr; NL07", "NL07v4"),
+    ("cELP03v2-NL08v4", "PEL03 &rarr; NL08", "NL08v4"),
+    ("cELP11v2-NL07v4", "PEL11 &rarr; NL07", "NL07v4"),
+    ("cELP11v2-NL08v4", "PEL11 &rarr; NL08", "NL08v4"),
+]
+UTTS = ["284", "304", "318"]
+
+# 試聽列：(顯示名, css class, 檔名樣板)；樣板的 {pair}/{trg}/{utt} 由下面填。
+ROWS = [
+    ("PEL (unprocessed)", "tag-pel", "audio/anchor_pel_raw_{pair}_{utt}.wav"),
+    ("ETN-mel", "tag-mel", "audio/etn_mel_s4_o2o_{pair}_{utt}.wav"),
+    ("ETN-wavlm", "tag-wavlm", "audio/etn_wavlm_s4_o2o_{pair}_{utt}.wav"),
+    ("ETN-elwavlm", "tag-elw", "audio/elw_a5_s4_o2o_{pair}_{utt}.wav"),
+    ("NL (reference)", "tag-nl", "audio/anchor_nl_ref_{trg}_{utt}.wav"),
+]
+
+
+def audio_blocks():
+    out = []
+    for pair, pair_label, trg in PAIRS:
+        out.append(f'      <div class="pair-label">{pair_label}</div>')
+        for utt in UTTS:
+            rows = []
+            for name, cls, tmpl in ROWS:
+                src = tmpl.format(pair=pair, trg=trg, utt=utt)
+                path = os.path.join(HERE, src)
+                if not os.path.exists(path):        # 缺檔就不畫空播放器
+                    raise SystemExit(f"缺少音檔：{src}")
+                rows.append(
+                    '          <div class="audio-row">\n'
+                    f'            <span class="model-tag {cls}">{name}</span>\n'
+                    f'            <audio controls preload="none"><source src="{src}" type="audio/wav"></audio>\n'
+                    '          </div>'
+                )
+            rows_html = "\n".join(rows)
+            out.append(
+                '      <div class="sample-block">\n'
+                '        <div class="sample-header">\n'
+                f'          <span class="sample-num">Sentence {utt}</span>\n'
+                f'          <span class="transcript">{TMHINT[utt]}</span>\n'
+                f'          <span class="sample-note">{pair_label} &middot; after Stage 4 (o2o)</span>\n'
+                '        </div>\n'
+                '        <div class="audio-rows">\n'
+                f'{rows_html}\n'
+                '        </div>\n'
+                '      </div>'
+            )
+    return "\n".join(out)
+
+
+def spec_gallery():
+    out = []
+    for pair, pair_label, _ in PAIRS:
+        pat = pair.split("-")[0]
+        trg = pair.split("-")[1]
+        for utt in UTTS:
+            fn = f"figure/fig2_spectrogram_{pat}_{trg}_{utt}.png"
+            if not os.path.exists(os.path.join(HERE, fn)):
+                raise SystemExit(f"缺少頻譜圖：{fn}")
+            out.append(
+                '      <div class="fig-block">\n'
+                f'        <img src="{fn}" alt="Log-mel spectrograms, {pair_label}, sentence {utt}">\n'
+                f'        <p class="fig-caption">{pair_label} &middot; evaluation sentence {utt}: '
+                f'{TMHINT[utt]}</p>\n'
+                '      </div>'
+            )
+    return "\n".join(out)
+
+
+CSS = """
+    :root {
+      --bg: #f5f6f8;
+      --surface: #ffffff;
+      --surface2: #f0f2f5;
+      --border: #dde1e8;
+      --accent: #1a6fbe;
+      --accent2: #2e7d32;
+      --accent3: #b45309;
+      --text: #1a1f2e;
+      --text-muted: #5a6478;
+      --pel-color: #c0392b;
+      --mel-color: #6a1b9a;
+      --wavlm-color: #00695c;
+      --elw-color: #e65100;
+      --nl-color: #37474f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(26,111,190,0.07) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 60px 0 48px;
+    }
+
+    .tag-line {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: clamp(20px, 3.5vw, 30px);
+      font-weight: 600;
+      line-height: 1.35;
+      color: #0f172a;
+      max-width: 820px;
+    }
+
+    h1 span { color: var(--accent); }
+
+    .authors {
+      margin-top: 18px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .abstract-block {
+      margin-top: 32px;
+      background: #eef4fb;
+      border: 1px solid #c8dcf0;
+      border-left: 3px solid var(--accent);
+      padding: 24px 28px;
+      border-radius: 2px;
+    }
+
+    .abstract-block h2 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .abstract-block p { color: #374151; font-size: 14px; line-height: 1.8; }
+
+    section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+
+    .section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h2.section-title { font-size: 20px; font-weight: 600; color: #0f172a; margin-bottom: 28px; }
+
+    h3.sub-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #0f172a;
+      margin: 32px 0 14px;
+    }
+
+    .fig-block { margin-bottom: 32px; text-align: center; }
+    .fig-block img { max-width: 100%; border: 1px solid var(--border); border-radius: 4px; background: #fff; }
+    .fig-caption { font-size: 13px; color: var(--text-muted); margin-top: 10px; text-align: left; line-height: 1.6; }
+
+    .model-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .model-card { background: var(--surface); border: 1px solid var(--border); padding: 16px 18px; border-radius: 4px; }
+    .model-card .name { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .model-card .desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+    .stage-list { list-style: none; margin-top: 8px; }
+    .stage-list li {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 4px;
+      padding: 10px 16px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .stage-list li b { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text); margin-right: 8px; }
+
+    .dataset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+    .dataset-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 20px; }
+    .dataset-card h4 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .dataset-card ul { list-style: none; font-size: 13px; color: var(--text-muted); }
+    .dataset-card ul li { padding: 3px 0; }
+    .dataset-card ul li::before { content: '\\00b7  '; color: var(--accent); }
+
+    .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
+    .legend-item {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 5px 12px; border-radius: 100px; font-size: 12px;
+    }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    .metrics-categories {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .metrics-cat { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 20px; }
+    .metrics-cat h4 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--accent3);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .metrics-cat ul { list-style: none; font-size: 13px; }
+    .metrics-cat ul li { padding: 3px 0; color: var(--text); }
+    .metrics-cat ul li span {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      margin-right: 6px;
+    }
+
+    .metrics-block { margin-bottom: 36px; }
+
+    .table-caption { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.6; }
+    .table-caption b { color: var(--text); }
+
+    .metrics-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .metrics-table th {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 10px 10px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      background: #f0f2f5;
+    }
+    .metrics-table th:first-child { text-align: left; }
+    .metrics-table td { padding: 9px 10px; text-align: center; border-bottom: 1px solid var(--border); background: #fff; }
+    .metrics-table td:first-child { text-align: left; font-family: 'IBM Plex Mono', monospace; }
+    .metrics-table tr:last-child td { border-bottom: none; }
+    .metrics-table tr.proposed td { background: #fffaf3; }
+    .metrics-table td.num { font-variant-numeric: tabular-nums; }
+    .best { color: var(--accent2); font-weight: 600; }
+    .mark { font-family: 'IBM Plex Mono', monospace; color: var(--text-muted); }
+    .rowsep td { border-bottom: 1px solid #b9c2d0; }
+
+    .pair-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      color: var(--accent3);
+      margin: 28px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pair-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .sample-block {
+      margin-bottom: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .sample-header {
+      padding: 12px 20px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .sample-num {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 2px 10px;
+      border-radius: 100px;
+    }
+    .sample-note { font-size: 12px; color: var(--text-muted); font-style: italic; }
+    .transcript { font-size: 14px; color: #1e293b; }
+
+    .audio-rows { padding: 4px 0; }
+    .audio-row {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      align-items: center;
+      padding: 9px 20px;
+      gap: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .audio-row:last-child { border-bottom: none; }
+
+    .model-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 3px;
+      display: inline-block;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .tag-pel   { color: #c0392b; background: rgba(192,57,43,0.08);  border: 1px solid rgba(192,57,43,0.25); }
+    .tag-mel   { color: #6a1b9a; background: rgba(106,27,154,0.08); border: 1px solid rgba(106,27,154,0.25); }
+    .tag-wavlm { color: #00695c; background: rgba(0,105,92,0.08);   border: 1px solid rgba(0,105,92,0.25); }
+    .tag-elw   { color: #e65100; background: rgba(230,81,0,0.08);   border: 1px solid rgba(230,81,0,0.25); }
+    .tag-nl    { color: #37474f; background: rgba(55,71,79,0.08);   border: 1px solid rgba(55,71,79,0.25); }
+
+    audio {
+      width: 100%;
+      height: 36px;
+      accent-color: var(--accent);
+      background-color: #cbd5e1;
+      border-radius: 6px;
+    }
+    audio::-webkit-media-controls-panel { background-color: #cbd5e1; }
+    audio::-webkit-media-controls-play-button,
+    audio::-webkit-media-controls-mute-button { filter: brightness(0); }
+
+    footer { padding: 40px 0; font-size: 13px; color: var(--text-muted); }
+    footer p { line-height: 1.8; }
+
+    @media (max-width: 600px) {
+      .audio-row { grid-template-columns: 120px 1fr; gap: 10px; }
+      .model-grid, .dataset-grid, .metrics-categories { grid-template-columns: 1fr; }
+      .metrics-table { font-size: 12px; }
+      .metrics-table th, .metrics-table td { padding: 8px 6px; }
+    }
+"""
+
+
+def build():
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EL-WavLM &middot; Electrolaryngeal Speech Enhancement Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>{CSS}  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="tag-line">Audio Demo &middot; Electrolaryngeal Speech Enhancement</div>
+    <h1><span>EL-WavLM</span>: Staged Fine-Tuning of Self-Supervised Speech Encoders for Electrolaryngeal Speech Enhancement</h1>
+    <p class="authors">
+      Ming-Chi Yen<sup>1</sup>, Hsin-Te Hwang<sup>2</sup>, Chen-Chou Lo<sup>3</sup>, Yu Tsao<sup>2</sup>, Hsin-Min Wang<sup>1</sup><br>
+      <sup>1</sup>Institute of Information Science, Academia Sinica, Taiwan &middot;
+      <sup>2</sup>Research Center for Information Technology Innovation, Academia Sinica, Taiwan &middot;
+      <sup>3</sup>Department of Electrical Engineering, Yuan Ze University, Taiwan
+    </p>
+
+    <div class="abstract-block">
+      <h2>Abstract</h2>
+      <p>{ABSTRACT}</p>
+    </div>
+  </header>
+
+  <!-- System -->
+  <section>
+    <div class="section-label">System</div>
+    <h2 class="section-title">Architecture and Staged Fine-Tuning</h2>
+
+    <div class="fig-block">
+      <img src="figure/fig1_flow.png" alt="Training flow of ETN baselines and the proposed ETN-elwavlm">
+      <p class="fig-caption"><b>Fig. 1.</b> (a)&nbsp;Training flow of the ETN baseline model (top) and the proposed
+        ETN-elwavlm model (bottom). Both flows include pretraining on the NL corpus (Stages&nbsp;1&ndash;2), training on
+        many-to-many (m2m) SEL&ndash;NL pairs (Stage&nbsp;3), and one-to-one (o2o) adaptation to a PEL&ndash;NL pair
+        (Stage&nbsp;4). The difference lies in Stage&nbsp;3: in ETN, the encoder&ndash;decoder is fitted to all SEL&ndash;NL
+        pairs at once, while in ETN-elwavlm, the WavLM is first adapted to EL-WavLM (3-1), then the downstream modules are
+        adapted to fit the EL-WavLM (3-2), and finally all modules are jointly trained (3-3).
+        (b)&nbsp;Adapter between the WavLM and decoder, used to adapt the output of the WavLM to the input of the decoder.</p>
+    </div>
+
+    <div class="model-grid">
+      <div class="model-card">
+        <div class="name" style="color:var(--mel-color)">ETN-mel</div>
+        <div class="desc">Baseline. A from-scratch six-layer transformer encoder that reads mel-spectrograms and a decoder
+          that predicts them, with a Parallel WaveGAN vocoder.</div>
+      </div>
+      <div class="model-card">
+        <div class="name" style="color:var(--wavlm-color)">ETN-wavlm</div>
+        <div class="desc">Frozen-feature reference. Encoder input and decoder target become WavLM-L6 features extracted
+          once with WavLM-Large frozen; the vocoder becomes HiFi-GAN.</div>
+      </div>
+      <div class="model-card">
+        <div class="name" style="color:var(--elw-color)">ETN-elwavlm (proposed)</div>
+        <div class="desc">Replaces the from-scratch encoder with WavLM-Large plus an adapter reading the waveform, keeping
+          the WavLM-L6 decoder target and HiFi-GAN vocoder. The fine-tuned encoder is termed EL-WavLM.</div>
+      </div>
+    </div>
+
+    <h3 class="sub-title">Training stages</h3>
+    <ul class="stage-list">
+      <li><b>Stage 1</b>An encoder&ndash;decoder text-to-speech model is pretrained on an NL corpus.</li>
+      <li><b>Stage 2</b>Self-reconstruction on the same corpus: the ETN baselines pretrain their from-scratch encoder,
+        whereas ETN-elwavlm pretrains only the adapter with WavLM frozen.</li>
+      <li><b>Stage 3-1</b>Encoder only. Only WavLM is updated to EL-WavLM; the adapter, decoder and post-net are frozen.</li>
+      <li><b>Stage 3-2</b>Downstream only. The EL-WavLM encoder is frozen; the adapter, decoder and post-net are aligned to
+        the adapted encoder space.</li>
+      <li><b>Stage 3-3</b>Joint. Encoder, adapter, decoder and post-net are updated together, with the vocoder fixed.</li>
+      <li><b>Stage 4</b>One-to-one adaptation. All of the above modules are fine-tuned on a specific PEL&ndash;NL pair.</li>
+    </ul>
+
+    <div class="dataset-grid">
+      <div class="dataset-card">
+        <h4>NL corpus (Stages 1&ndash;2)</h4>
+        <ul>
+          <li>COSPRO: about 59k utterances, 44.4 hours</li>
+          <li>Contains no EL data; all EL data enter from Stage 3 onwards</li>
+        </ul>
+      </div>
+      <div class="dataset-card">
+        <h4>EL data (Stages 3&ndash;4)</h4>
+        <ul>
+          <li>Paired EL&ndash;NL recordings of 320 TMHINT sentences at 16 kHz</li>
+          <li>Six healthy speakers recorded SEL and NL speech (m2m training set: 240 sentences)</li>
+          <li>Two male laryngectomees recorded PEL speech: PEL03, PEL11</li>
+          <li>Four PEL&ndash;NL pairs, 240 train / 40 dev / 40 eval sentences each</li>
+          <li>o2o training augments the PEL side with WSOLA at rates 0.80&ndash;0.95</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Metrics -->
+  <section>
+    <div class="section-label">Evaluation</div>
+    <h2 class="section-title">Evaluation Metrics</h2>
+
+    <div class="metrics-categories">
+      <div class="metrics-cat">
+        <h4>Intelligibility</h4>
+        <ul>
+          <li><span>W-CER</span>Character error rate of Whisper large-v3 &darr;</li>
+        </ul>
+      </div>
+      <div class="metrics-cat">
+        <h4>Spectral Distortion</h4>
+        <ul>
+          <li><span>MCD</span>Mel-cepstral distortion on 41-dim WORLD mel-cepstra, DTW-aligned &darr;</li>
+        </ul>
+      </div>
+      <div class="metrics-cat">
+        <h4>F0 / Pitch</h4>
+        <ul>
+          <li><span>F0 RMSE</span>Root-mean-square error of F0 &darr;</li>
+          <li><span>F0 Corr</span>Correlation of F0 contours &uarr;</li>
+        </ul>
+      </div>
+      <div class="metrics-cat">
+        <h4>Duration</h4>
+        <ul>
+          <li><span>DDUR</span>Duration difference &darr;</li>
+        </ul>
+      </div>
+      <div class="metrics-cat">
+        <h4>Speaker / Quality</h4>
+        <ul>
+          <li><span>SpkSim</span>Speaker similarity &uarr;</li>
+          <li><span>UTMOS</span>Neural MOS predictor &uarr;</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="fig-caption">SpkSim and UTMOS are neural proxies for speaker similarity and naturalness; no subjective
+      listening test is conducted, so the systems are compared with each other and these scores are not read as human
+      ratings. All metrics are computed by one pipeline on the same waveforms after loudness normalisation to
+      &minus;24&nbsp;LUFS. Every tabulated value is the mean over the four PEL&ndash;NL evaluation pairs.</p>
+  </section>
+
+  <!-- Results -->
+  <section>
+    <div class="section-label">Results</div>
+    <h2 class="section-title">Experimental Results</h2>
+
+    <div class="metrics-block">
+      <p class="table-caption"><b>Table 1.</b> Main comparison of the three systems: each cell is the mean of the four
+        PEL&ndash;NL pairs&rsquo; objective evaluation metrics.</p>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>System</th>
+            <th>MCD&darr; (dB)</th>
+            <th>F0 RMSE&darr; (Hz)</th>
+            <th>F0 Corr&uarr;</th>
+            <th>DDUR&darr; (s)</th>
+            <th>W-CER&darr; (%)</th>
+            <th>SpkSim&uarr;</th>
+            <th>UTMOS&uarr;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ETN-mel</td>
+            <td class="num">8.36</td>
+            <td class="num best">32.5</td>
+            <td class="num best">0.147</td>
+            <td class="num">0.371</td>
+            <td class="num">88.3</td>
+            <td class="num">0.707</td>
+            <td class="num">1.597</td>
+          </tr>
+          <tr>
+            <td>ETN-wavlm</td>
+            <td class="num">7.64</td>
+            <td class="num">48.6</td>
+            <td class="num">0.123</td>
+            <td class="num best">0.295</td>
+            <td class="num">82.8</td>
+            <td class="num best">0.829</td>
+            <td class="num best">2.767</td>
+          </tr>
+          <tr class="proposed">
+            <td><b>ETN-elwavlm (proposed)</b></td>
+            <td class="num best">7.18</td>
+            <td class="num">46.8</td>
+            <td class="num">0.127</td>
+            <td class="num">0.299</td>
+            <td class="num best">62.5</td>
+            <td class="num">0.827</td>
+            <td class="num">2.764</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="metrics-block">
+      <p class="table-caption"><b>Table 2.</b> Schedule ablation (W-CER&nbsp;%). Row&nbsp;0 is ETN-elwavlm-frozen, i.e.
+        ETN-elwavlm without Stage-3 fine-tuning; its Stage-4 value is not evaluated. The last row is the proposed system.</p>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Stage 3-1</th>
+            <th>Stage 3-2</th>
+            <th>Stage 3-3</th>
+            <th>after Stage 3</th>
+            <th>after Stage 4</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="rowsep">
+            <td>0</td>
+            <td class="mark">&ndash;</td>
+            <td class="mark">&ndash;</td>
+            <td class="mark">&ndash;</td>
+            <td class="num">102.56</td>
+            <td class="mark">&ndash;</td>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td>&#10003;</td>
+            <td class="mark">&ndash;</td>
+            <td class="mark">&ndash;</td>
+            <td class="num">69.56</td>
+            <td class="num">66.31</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td class="mark">&ndash;</td>
+            <td class="mark">&ndash;</td>
+            <td>&#10003;</td>
+            <td class="num">69.44</td>
+            <td class="num">66.44</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>&#10003;</td>
+            <td>&#10003;</td>
+            <td class="mark">&ndash;</td>
+            <td class="num">67.62</td>
+            <td class="num">67.31</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>&#10003;</td>
+            <td class="mark">&ndash;</td>
+            <td>&#10003;</td>
+            <td class="num">66.19</td>
+            <td class="num">66.69</td>
+          </tr>
+          <tr class="proposed">
+            <td>5</td>
+            <td>&#10003;</td>
+            <td>&#10003;</td>
+            <td>&#10003;</td>
+            <td class="num best">65.06</td>
+            <td class="num best">62.50</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="metrics-block">
+      <p class="table-caption"><b>Table 3.</b> Supervision ablation (W-CER&nbsp;%). All variants use reconstruction
+        supervision; rows&nbsp;2&ndash;4 add the listed teacher supervision during Stages&nbsp;3-1 and&nbsp;3-3.</p>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Recon.</th>
+            <th>Teacher</th>
+            <th>after Stage 3</th>
+            <th>after Stage 4</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="proposed">
+            <td>1</td>
+            <td>Yes</td>
+            <td>None</td>
+            <td class="num best">65.06</td>
+            <td class="num best">62.50</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Yes</td>
+            <td>L1 (encoder)</td>
+            <td class="num">66.81</td>
+            <td class="num">67.94</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Yes</td>
+            <td>MSE (encoder)</td>
+            <td class="num">66.00</td>
+            <td class="num">64.06</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Yes</td>
+            <td>MSE (encoder+adapter)</td>
+            <td class="num">67.81</td>
+            <td class="num">69.00</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Encoder visualization -->
+  <section>
+    <div class="section-label">Visualization</div>
+    <h2 class="section-title">WavLM-L24 Encoder Space</h2>
+
+    <div class="fig-block">
+      <img src="figure/fig2_tsne.png" alt="t-SNE of the WavLM-L24 encoder space towards NL07">
+      <p class="fig-caption"><b>Fig. 2.</b> WavLM-L24 encoder-space t-SNE towards NL07, one row per patient. From left to
+        right, the columns are ETN-elwavlm-frozen, ETN-elwavlm with Stage&nbsp;3-3 only, and ETN-elwavlm with the full
+        schedule; the latter two are measured after Stage&nbsp;3. Grey points are NL07 frames and coloured points are PEL
+        frames. Each panel is embedded independently.</p>
+    </div>
+  </section>
+
+  <!-- Spectrograms -->
+  <section>
+    <div class="section-label">Visualization</div>
+    <h2 class="section-title">Spectrograms</h2>
+
+    <p class="fig-caption" style="margin-bottom:24px;">Log-mel spectrograms of the same evaluation sentence across the
+      systems, for all four PEL&ndash;NL pairs and three evaluation sentences. Panel order: unprocessed PEL speech, ETN-mel,
+      ETN-wavlm, ETN-elwavlm with Stage&nbsp;3-3 only (Table&nbsp;2, row&nbsp;2), ETN-elwavlm with the full schedule
+      (Table&nbsp;2, row&nbsp;5, the proposed system), and the NL reference. Panel titles use the earlier figure labels,
+      in which &ldquo;EL-WavLM&rdquo; denotes the ETN-elwavlm system. The per-panel CER is a single-sentence value and is
+      noisy; it is intended for reading the spectrograms only, and Table&nbsp;1 is the reported evidence.</p>
+
+{spec_gallery()}
+  </section>
+
+  <!-- Audio -->
+  <section>
+    <div class="section-label">Listening</div>
+    <h2 class="section-title">Audio Samples</h2>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--pel-color)"></div>PEL (unprocessed)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--mel-color)"></div>ETN-mel</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--wavlm-color)"></div>ETN-wavlm</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--elw-color)"></div>ETN-elwavlm (proposed)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--nl-color)"></div>NL (reference)</div>
+    </div>
+
+    <p class="fig-caption" style="margin-bottom:8px;">All converted samples are taken after Stage&nbsp;4 (o2o
+      patient-specific adaptation), from the same loudness-normalised waveforms used for the objective evaluation.
+      The PEL and NL rows are the unprocessed patient recording and the natural reference of the same sentence.</p>
+
+{audio_blocks()}
+  </section>
+
+  <footer>
+    <p>Audio Demo &middot; EL-WavLM &middot; Electrolaryngeal Speech Enhancement</p>
+  </footer>
+
+</div>
+</body>
+</html>
+"""
+    out = os.path.join(HERE, "index.html")
+    with open(out, "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"寫出 {out}（{len(html.splitlines())} 行）")
+
+
+if __name__ == "__main__":
+    build()
