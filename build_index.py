@@ -774,6 +774,8 @@ def build():
         right, the columns are ETN-elwavlm-frozen, ETN-elwavlm with Stage&nbsp;3-3 only, and ETN-elwavlm with the full
         schedule; the latter two are measured after Stage&nbsp;3. Grey points are NL07 frames and coloured points are PEL
         frames. Each panel is embedded independently.</p>
+      <p class="fig-caption">This figure pools <b>all 40 evaluation sentences (281&ndash;320)</b> of each patient towards
+        NL07; it is the whole-set view, in contrast to the single-sentence t-SNE panels in the sample cards below.</p>
     </div>
   </section>
 
@@ -791,7 +793,8 @@ def build():
     </div>
 
     <p class="fig-caption" style="margin-bottom:6px;">Each card shows one evaluation sentence: the log-mel spectrograms
-      on top and the corresponding audio below. Spectrogram panel order: unprocessed PEL speech, ETN-mel, ETN-wavlm,
+      on top, a <b>single-sentence</b> encoder-space t-SNE (all frames of that sentence only, same three encoders and
+      after-Stage-3 checkpoints as Fig.&nbsp;2) in the middle, and the corresponding audio below. Spectrogram panel order: unprocessed PEL speech, ETN-mel, ETN-wavlm,
       ETN-elwavlm with Stage&nbsp;3-3 only (Table&nbsp;2, row&nbsp;2), ETN-elwavlm with the full schedule
       (Table&nbsp;2, row&nbsp;5, the proposed system), and the NL reference. Panel titles use the earlier figure labels,
       in which &ldquo;EL-WavLM&rdquo; denotes the ETN-elwavlm system. The per-panel CER is a single-sentence value and is
