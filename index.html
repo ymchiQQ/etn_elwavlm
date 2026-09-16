@@ -154,8 +154,9 @@
       text-transform: uppercase;
     }
     .dataset-card ul { list-style: none; font-size: 13px; color: var(--text-muted); }
-    .dataset-card ul li { padding: 3px 0; }
-    .dataset-card ul li::before { content: '\00b7  '; color: var(--accent); }
+    /* 懸掛縮排：項目符號絕對定位在左側，換行的第二行對齊文字而不是退回符號底下 */
+    .dataset-card ul li { padding: 3px 0 3px 1.1em; position: relative; }
+    .dataset-card ul li::before { content: '\00b7'; color: var(--accent); position: absolute; left: 0.2em; }
 
     .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
     .legend-item {
