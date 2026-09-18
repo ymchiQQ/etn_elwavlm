@@ -518,8 +518,9 @@ def build():
     <h3 class="sub-title">Training stages</h3>
     <ul class="stage-list">
       <li><b>Stage 1</b>An encoder&ndash;decoder text-to-speech model is pretrained on an NL corpus.</li>
-      <li><b>Stage 2</b>Self-reconstruction on the same corpus: the ETN baselines pretrain their from-scratch encoder,
-        whereas ETN-elwavlm pretrains only the adapter with WavLM frozen.</li>
+      <li><b>Stage 2</b>Waveform reconstruction on the same corpus with the decoder frozen: the ETN baselines pretrain
+        their from-scratch speech encoder, whereas ETN-elwavlm pretrains only the adapter, with the WavLM and the
+        decoder frozen.</li>
       <li><b>Stage 3-1</b>Encoder only. Only WavLM is updated to EL-WavLM; the adapter, decoder and post-net are frozen.</li>
       <li><b>Stage 3-2</b>Downstream only. The EL-WavLM encoder is frozen; the adapter, decoder and post-net are aligned to
         the adapted encoder space.</li>
@@ -538,11 +539,15 @@ def build():
       <div class="dataset-card">
         <h4>EL data (Stages 3&ndash;4)</h4>
         <ul>
-          <li>Paired EL&ndash;NL recordings of 320 TMHINT sentences at 16 kHz</li>
-          <li>Six healthy speakers recorded SEL and NL speech (m2m training set: 240 sentences)</li>
+          <li>Paired EL&ndash;NL recordings of 320 TMHINT sentences (10 Mandarin characters each) at 16 kHz</li>
+          <li>Six healthy speakers (4 men and 2 women) recorded SEL and NL speech; Stage 3 is many-to-many over all
+            6&nbsp;&times;&nbsp;6 SEL&ndash;NL pairs</li>
           <li>Two male laryngectomees recorded PEL speech: PEL03, PEL11</li>
-          <li>Four PEL&ndash;NL pairs, 240 train / 40 dev / 40 eval sentences each</li>
-          <li>o2o training augments the PEL side with WSOLA at rates 0.80&ndash;0.95</li>
+          <li>Stage 4 is one-to-one: the four PEL&ndash;NL pairs are trained and tested separately</li>
+          <li>Each pair is split into the first 240 utterances for training, the next 40 for development and the last
+            40 for testing</li>
+          <li>o2o training augments the PEL side with WSOLA at speech rates 0.80, 0.85, 0.90 and 0.95, giving five
+            versions including the original</li>
         </ul>
       </div>
     </div>
@@ -557,41 +562,32 @@ def build():
       <div class="metrics-cat">
         <h4>Intelligibility</h4>
         <ul>
-          <li><span>W-CER</span>Character error rate of Whisper large-v3 &darr;</li>
+          <li><span>W-CER</span>Character error rate of Whisper large-v3 on the converted speech &darr;</li>
+          <li><span>MOS</span>Subjective intelligibility rated by listeners on a five-point scale &uarr;</li>
         </ul>
       </div>
       <div class="metrics-cat">
         <h4>Spectral Distortion</h4>
         <ul>
-          <li><span>MCD</span>Mel-cepstral distortion on 41-dim WORLD mel-cepstra, DTW-aligned &darr;</li>
+          <li><span>MCD</span>Mel-cepstral distortion on 41-dim WORLD mel-cepstra, DTW-aligned, excluding c<sub>0</sub> &darr;</li>
         </ul>
       </div>
       <div class="metrics-cat">
-        <h4>F0 / Pitch</h4>
+        <h4>Naturalness</h4>
         <ul>
-          <li><span>F0 RMSE</span>Root-mean-square error of F0 &darr;</li>
-          <li><span>F0 Corr</span>Correlation of F0 contours &uarr;</li>
-        </ul>
-      </div>
-      <div class="metrics-cat">
-        <h4>Duration</h4>
-        <ul>
-          <li><span>DDUR</span>Duration difference &darr;</li>
-        </ul>
-      </div>
-      <div class="metrics-cat">
-        <h4>Speaker / Quality</h4>
-        <ul>
-          <li><span>SpkSim</span>Speaker similarity &uarr;</li>
-          <li><span>UTMOS</span>Neural MOS predictor &uarr;</li>
+          <li><span>UTMOS</span>Mean opinion score predicted by a neural assessment model &uarr;</li>
         </ul>
       </div>
     </div>
 
-    <p class="fig-caption">SpkSim and UTMOS are neural proxies for speaker similarity and naturalness; no subjective
-      listening test is conducted, so the systems are compared with each other and these scores are not read as human
-      ratings. All metrics are computed by one pipeline on the same waveforms after loudness normalisation to
-      &minus;24&nbsp;LUFS. Every tabulated value is the mean over the four PEL&ndash;NL evaluation pairs.</p>
+    <p class="fig-caption">A subjective intelligibility test was also carried out. Ten listeners (5 men and 5 women)
+      gave five-point MOS scores to 20 speech samples from each system, as well as 10 PEL and 10 NL anchor samples,
+      with no overlap in utterances within each pair. The MOS was averaged within each listener and then across
+      listeners, and is reported with a 95% confidence interval.</p>
+
+    <p class="fig-caption">All objective metrics are computed by one pipeline on the same waveforms after loudness
+      normalisation to &minus;24&nbsp;LUFS. Every tabulated value is the mean over the four PEL&ndash;NL evaluation
+      pairs.</p>
   </section>
 
   <!-- Results -->
@@ -600,18 +596,14 @@ def build():
     <h2 class="section-title">Experimental Results</h2>
 
     <div class="metrics-block">
-      <p class="table-caption"><b>Table 1.</b> Main comparison of the three systems: each cell is the mean of the four
-        PEL&ndash;NL pairs&rsquo; objective evaluation metrics.</p>
+      <p class="table-caption"><b>Table 1.</b> Comparison of three systems. Each cell represents the average of the
+        objective evaluation metrics for the four PEL&ndash;NL pairs.</p>
       <table class="metrics-table">
         <thead>
           <tr>
             <th>System</th>
             <th>MCD&darr; (dB)</th>
-            <th>F0 RMSE&darr; (Hz)</th>
-            <th>F0 Corr&uarr;</th>
-            <th>DDUR&darr; (s)</th>
             <th>W-CER&darr; (%)</th>
-            <th>SpkSim&uarr;</th>
             <th>UTMOS&uarr;</th>
           </tr>
         </thead>
@@ -619,31 +611,19 @@ def build():
           <tr>
             <td>ETN-mel</td>
             <td class="num">8.36</td>
-            <td class="num best">32.5</td>
-            <td class="num best">0.147</td>
-            <td class="num">0.371</td>
             <td class="num">88.3</td>
-            <td class="num">0.707</td>
             <td class="num">1.597</td>
           </tr>
           <tr>
             <td>ETN-wavlm</td>
             <td class="num">7.64</td>
-            <td class="num">48.6</td>
-            <td class="num">0.123</td>
-            <td class="num best">0.295</td>
             <td class="num">82.8</td>
-            <td class="num best">0.829</td>
             <td class="num best">2.767</td>
           </tr>
           <tr class="proposed">
             <td><b>ETN-elwavlm (proposed)</b></td>
             <td class="num best">7.18</td>
-            <td class="num">46.8</td>
-            <td class="num">0.127</td>
-            <td class="num">0.299</td>
             <td class="num best">62.5</td>
-            <td class="num">0.827</td>
             <td class="num">2.764</td>
           </tr>
         </tbody>
@@ -651,7 +631,42 @@ def build():
     </div>
 
     <div class="metrics-block">
-      <p class="table-caption"><b>Table 2.</b> Schedule ablation (W-CER&nbsp;%). Row&nbsp;0 is ETN-elwavlm-frozen, i.e.
+      <p class="table-caption"><b>Table 2.</b> Subjective intelligibility MOS with 95% confidence intervals across
+        listeners.</p>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>System</th>
+            <th>MOS&uarr;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ETN-mel</td>
+            <td class="num">2.47 &plusmn; 0.62</td>
+          </tr>
+          <tr>
+            <td>ETN-wavlm</td>
+            <td class="num">2.72 &plusmn; 0.75</td>
+          </tr>
+          <tr class="proposed rowsep">
+            <td><b>ETN-elwavlm (proposed)</b></td>
+            <td class="num best">3.67 &plusmn; 0.55</td>
+          </tr>
+          <tr>
+            <td>PEL (unprocessed)</td>
+            <td class="num">1.44 &plusmn; 0.39</td>
+          </tr>
+          <tr>
+            <td>NL (reference)</td>
+            <td class="num">5.00 &plusmn; 0.00</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="metrics-block">
+      <p class="table-caption"><b>Table 3.</b> Schedule ablation measured by W-CER&nbsp;(%). Row&nbsp;0 is ETN-elwavlm-frozen, i.e.
         ETN-elwavlm without Stage-3 fine-tuning; its Stage-4 value is not evaluated. The last row is the proposed system.</p>
       <table class="metrics-table">
         <thead>
@@ -718,7 +733,7 @@ def build():
     </div>
 
     <div class="metrics-block">
-      <p class="table-caption"><b>Table 3.</b> Supervision ablation (W-CER&nbsp;%). All variants use reconstruction
+      <p class="table-caption"><b>Table 4.</b> Teacher-loss ablation measured by W-CER&nbsp;(%). All variants use reconstruction
         supervision; rows&nbsp;2&ndash;4 add the listed teacher supervision during Stages&nbsp;3-1 and&nbsp;3-3.</p>
       <table class="metrics-table">
         <thead>
@@ -778,6 +793,10 @@ def build():
       <p class="fig-caption">This figure pools <b>all 40 evaluation sentences (281&ndash;320) of each patient, 80 samples in total
         over PEL03 and PEL11</b>, towards NL07; it is the whole-set view, in contrast to the single-sentence t-SNE panels
         in the sample cards below.</p>
+      <p class="fig-caption">The colour of each PEL point is the cosine distance to its DTW-aligned NL frame in the
+        original encoder space; darker is closer. Averaged over the aligned frame pairs, this distance
+        <i>d</i>&nbsp;=&nbsp;1&nbsp;&minus;&nbsp;cos(h<sub>PEL</sub>, h<sub>NL</sub>) decreases towards NL07 from 0.725
+        for ETN-elwavlm-frozen to 0.428 for Stage&nbsp;3-3 only and 0.377 for the full schedule.</p>
     </div>
   </section>
 
@@ -797,8 +816,8 @@ def build():
     <p class="fig-caption" style="margin-bottom:6px;">Each card shows one evaluation sentence: the log-mel spectrograms
       on top, a <b>single-sentence</b> encoder-space t-SNE (all frames of that sentence only, same three encoders and
       after-Stage-3 checkpoints as Fig.&nbsp;2) in the middle, and the corresponding audio below. Spectrogram panel order: unprocessed PEL speech, ETN-mel, ETN-wavlm,
-      ETN-elwavlm with Stage&nbsp;3-3 only (Table&nbsp;2, row&nbsp;2), ETN-elwavlm with the full schedule
-      (Table&nbsp;2, row&nbsp;5, the proposed system), and the NL reference. Panel titles use the earlier figure labels,
+      ETN-elwavlm with Stage&nbsp;3-3 only (Table&nbsp;3, row&nbsp;2), ETN-elwavlm with the full schedule
+      (Table&nbsp;3, row&nbsp;5, the proposed system), and the NL reference. Panel titles use the earlier figure labels,
       in which &ldquo;EL-WavLM&rdquo; denotes the ETN-elwavlm system. The per-panel CER is a single-sentence value and is
       noisy; it is intended for reading the spectrograms only, and Table&nbsp;1 is the reported evidence.</p>
 
