@@ -42,3 +42,11 @@
   補齊 NL08 的三句（先前只有 NL07），284 素材全部移除。
 - Note: PEL11→NL07 句 287 三系統皆 0.9，該卡片對比不明顯；PEL11→NL08 為 0.9／0.9／0.5。
 - Description: 主程式 `result_csv/tools/paper/export_plot_pkg.py` 的 UTTS 同步改為 (318,304,287)。
+
+## 2026-09-22
+
+- Version: mos-12
+- Description: Table 2（主觀 MOS）改為 12 位聽者（9 男 3 女）版，數字來源
+  `ICASSP2027_elw/subjective_mos_20260922.tsv`（每位聽者先平均、再跨聽者，95% CI＝1.96·SD/√n），
+  與 main.tex `tab:mos` 同步：ETN-mel 2.07±0.36、ETN-wavlm 2.47±0.38、ETN-elwavlm 3.21±0.37、PEL 1.23±0.20、NL 5.00±0.00。
+  只改 `build_index.py` 的文字與表格，重產 `index.html`；音檔／圖檔不動。
