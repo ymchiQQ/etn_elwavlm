@@ -1,5 +1,16 @@
 # Demo Page Version Log
 
+## 2026-09-24
+
+- Version: m2m wording sync
+- Description: 依 2026-09-24 版 main.tex 同步敘述（表格數字不變）
+  - 摘要換成 147 字版：拿掉 SEL-only 說法，改「adapted to EL data」、「Before o2o adaptation … already」，
+    baseline 改在末句括號定義
+  - Stage 3 資料事實更正：m2m 為 8 EL（6 SEL＋2 PEL）× 6 NL＝48 配對、只用各配對的訓練段；
+    dataset card 與 Fig. 1 caption 由「6 × 6 SEL–NL」改為「8 × 6 EL–NL」
+  - Fig. 1 換成 f4 版（`fig1_flow_paper_f4.png`，Stage 3 標籤 m2m EL→NL；版面同 f3）
+  - Stage 2 說明由「Waveform reconstruction」改「Self-reconstruction of NL speech」（目標是 decoder 特徵，不是波形）
+
 ## 2026-09-16
 
 - Version: initial

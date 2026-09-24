@@ -331,7 +331,7 @@
 
     <div class="abstract-block">
       <h2>Abstract</h2>
-      <p>Electrolaryngeal (EL) speech enhancement aims to improve the intelligibility of EL speech and make it closer to natural (NL) speech. Voice conversion (VC) is one approach. Self-supervised learning (SSL) models are primarily used as frozen feature extractors for VC and are rarely fine-tuned for EL speech, which is extremely challenging due to the scarcity of patient EL data. We propose EL-WavLM, a WavLM-Large encoder adapted to simulated EL (SEL) data through staged fine-tuning (optionally with the addition of a teacher loss), to replace the encoder of the electrolaryngeal speech transformer network (ETN). The resulting system ETN-elwavlm is then adapted for each patient&rsquo;s EL (PEL) speech. Two ETN baselines are used, one with mel-spectrograms (ETN-mel) and the other with frozen WavLM features (ETN-wavlm). With only SEL&ndash;NL fine-tuning, ETN-elwavlm achieved a Whisper character error rate (W-CER) of 65.1% on the PEL&ndash;NL pairs; after PEL&ndash;NL adaptation, the best setting (full staged fine-tuning without teacher loss) reached 62.5%, compared to 88.3% for ETN-mel and 82.8% for ETN-wavlm.</p>
+      <p>Electrolaryngeal (EL) speech enhancement aims to improve the intelligibility of EL speech and make it closer to natural (NL) speech. Self-supervised learning (SSL) models are primarily used as frozen feature extractors for voice conversion (VC) and are rarely fine-tuned for EL speech, which is extremely challenging due to the scarcity of patient EL data. We propose EL-WavLM, a WavLM-Large encoder adapted to EL data through staged fine-tuning (optionally with the addition of a teacher loss), to replace the encoder of the electrolaryngeal speech transformer network (ETN). The resulting system ETN-elwavlm is then adapted one-to-one (o2o) for each patient&rsquo;s EL (PEL) speech. Before o2o adaptation, ETN-elwavlm already achieved a Whisper character error rate (W-CER) of 65.1% on the PEL&ndash;NL pairs; after o2o adaptation, the best setting (full staged fine-tuning without teacher loss) reached 62.5%, compared to 88.3% for ETN-mel (mel-spectrogram input) and 82.8% for ETN-wavlm (frozen WavLM features).</p>
     </div>
   </header>
 
@@ -344,8 +344,8 @@
       <img src="figure/fig1_flow.png" alt="Training flow of ETN baselines and the proposed ETN-elwavlm">
       <p class="fig-caption"><b>Fig. 1.</b> (a)&nbsp;Training flow of the ETN baseline model (top) and the proposed
         ETN-elwavlm model (bottom). Both flows include pretraining on the NL corpus (Stages&nbsp;1&ndash;2), training on
-        many-to-many (m2m) SEL&ndash;NL pairs (Stage&nbsp;3), and one-to-one (o2o) adaptation to a PEL&ndash;NL pair
-        (Stage&nbsp;4). The difference lies in Stage&nbsp;3: in ETN, the encoder&ndash;decoder is fitted to all SEL&ndash;NL
+        many-to-many (m2m) EL&ndash;NL pairs (Stage&nbsp;3), and one-to-one (o2o) adaptation to a PEL&ndash;NL pair
+        (Stage&nbsp;4). The difference lies in Stage&nbsp;3: in ETN, the encoder&ndash;decoder is fitted to all EL&ndash;NL
         pairs at once, while in ETN-elwavlm, the WavLM is first adapted to EL-WavLM (3-1), then the downstream modules are
         adapted to fit the EL-WavLM (3-2), and finally all modules are jointly trained (3-3).
         (b)&nbsp;Adapter between the WavLM and decoder, used to adapt the output of the WavLM to the input of the decoder.</p>
@@ -372,7 +372,7 @@
     <h3 class="sub-title">Training stages</h3>
     <ul class="stage-list">
       <li><b>Stage 1</b>An encoder&ndash;decoder text-to-speech model is pretrained on an NL corpus.</li>
-      <li><b>Stage 2</b>Waveform reconstruction on the same corpus with the decoder frozen: the ETN baselines pretrain
+      <li><b>Stage 2</b>Self-reconstruction of NL speech on the same corpus with the decoder frozen: the ETN baselines pretrain
         their from-scratch speech encoder, whereas ETN-elwavlm pretrains only the adapter, with the WavLM and the
         decoder frozen.</li>
       <li><b>Stage 3-1</b>Encoder only. Only WavLM is updated to EL-WavLM; the adapter, decoder and post-net are frozen.</li>
@@ -394,9 +394,10 @@
         <h4>EL data (Stages 3&ndash;4)</h4>
         <ul>
           <li>Paired EL&ndash;NL recordings of 320 TMHINT sentences (10 Mandarin characters each) at 16 kHz</li>
-          <li>Six healthy speakers (4 men and 2 women) recorded SEL and NL speech; Stage 3 is many-to-many over all
-            6&nbsp;&times;&nbsp;6 SEL&ndash;NL pairs</li>
-          <li>Two male laryngectomees recorded PEL speech: PEL03, PEL11</li>
+          <li>Six healthy speakers (4 men and 2 women) recorded simulated EL (SEL) and NL speech; two male
+            laryngectomees recorded patient EL (PEL) speech: PEL03, PEL11</li>
+          <li>Stage 3 is many-to-many over all 8 EL speakers (6 SEL and 2 PEL) &times; 6 NL speakers, i.e.
+            8&nbsp;&times;&nbsp;6 EL&ndash;NL pairs, using only the training portion of each pair</li>
           <li>Stage 4 is one-to-one: the four PEL&ndash;NL pairs are trained and tested separately</li>
           <li>Each pair is split into the first 240 utterances for training, the next 40 for development and the last
             40 for testing</li>
